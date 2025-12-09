@@ -78,13 +78,13 @@ def main():
     parser = argparse.ArgumentParser(description='Add captured images to YOLO dataset')
     parser.add_argument(
         '--captured-dir',
-        default='../../captured_images',
-        help='Directory with captured images (default: ../../captured_images)'
+        default='../captured_images',
+        help='Directory with captured images (default: ../captured_images)'
     )
     parser.add_argument(
         '--dataset-dir',
-        default='../../datasets',
-        help='Target YOLO dataset directory (default: ../../datasets)'
+        default='../datasets',
+        help='Target YOLO dataset directory (default: ../datasets)'
     )
     
     args = parser.parse_args()
