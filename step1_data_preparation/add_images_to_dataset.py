@@ -22,9 +22,8 @@ def add_images_to_dataset(captured_dir, dataset_dir):
     dataset_path = Path(dataset_dir)
     
     # Create dataset directories if they don't exist
-    # Using train/ subdirectory for YOLO format
-    images_dir = dataset_path / "train" / "images"
-    labels_dir = dataset_path / "train" / "labels"
+    images_dir = dataset_path / "images"
+    labels_dir = dataset_path / "labels"
     images_dir.mkdir(parents=True, exist_ok=True)
     labels_dir.mkdir(parents=True, exist_ok=True)
     

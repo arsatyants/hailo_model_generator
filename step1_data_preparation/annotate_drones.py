@@ -18,13 +18,28 @@ class DroneAnnotator:
         self.labels_dir = self.dataset_path / "labels"
         
         # Load class names from data.yaml
-        data_yaml = self.dataset_path / "data.yaml"
+        # Try parent directory first (datasets/data.yaml), then current directory
+        data_yaml_parent = self.dataset_path.parent / "data.yaml"
+        data_yaml_current = self.dataset_path / "data.yaml"
+        
+        data_yaml = data_yaml_parent if data_yaml_parent.exists() else data_yaml_current
+        
         if data_yaml.exists():
+            print(f"📄 Loading classes from: {data_yaml}")
             with open(data_yaml, 'r') as f:
                 data = yaml.safe_load(f)
-                self.class_names = data.get('names', ['Aircraft', 'IR-Drone'])
+                # names can be a dict {0: 'class1', 1: 'class2'} or a list ['class1', 'class2']
+                names = data.get('names', {})
+                if isinstance(names, dict):
+                    # Convert dict to list, sorted by key
+                    max_idx = max(names.keys()) if names else 0
+                    self.class_names = [names.get(i, f'class_{i}') for i in range(max_idx + 1)]
+                else:
+                    self.class_names = names
+                print(f"✓ Loaded {len(self.class_names)} classes from data.yaml")
         else:
-            self.class_names = ['Aircraft', 'IR-Drone']
+            print(f"⚠️  data.yaml not found at {data_yaml}, using default classes")
+            self.class_names = ['DL-Drone', 'IR-Drone', 'AirPlane']
         
         print(f"📋 Available classes:")
         for i, name in enumerate(self.class_names):
@@ -159,7 +174,9 @@ class DroneAnnotator:
         print("Mouse:")
         print("  - Click & drag: Draw bounding box")
         print("\nKeyboard:")
-        print("  - 0-9: Switch class (0=Aircraft, 1=IR-Drone, etc.)")
+        # Display actual class names from data.yaml
+        class_list = ", ".join([f"{i}={name}" for i, name in enumerate(self.class_names)])
+        print(f"  - 0-{len(self.class_names)-1}: Switch class ({class_list})")
         print("  - SPACE: Add bbox to current image (continue annotating)")
         print("  - ENTER: Save and move to next image")
         print("  - 'n': Next image (without saving bbox)")

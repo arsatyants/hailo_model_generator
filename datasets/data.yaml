@@ -4,19 +4,20 @@
 # CRITICAL: Use absolute paths, not relative paths
 # YOLOv8 will fail with relative paths like './train/images'
 
-# Path to training images
-train: /absolute/path/to/your/dataset/train/images
+# Path to training images (absolute path)
+train: ~/hailo_model_generator/datasets/train/images
 
-# Path to validation images
-val: /absolute/path/to/your/dataset/val/images
+# Path to validation images (absolute path)
+val: ~/hailo_model_generator/datasets/val/images
 
 # Number of classes
-nc: 2
+nc: 3
 
 # Class names (must match label files)
 names:
-  0: drone
+  0: DL-Drone
   1: IR-Drone
+  2: AirPlane
 
 # Example for 4-class dataset:
 # nc: 4
