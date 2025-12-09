@@ -56,20 +56,19 @@ pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu11
 
 1. **Register** at [Hailo Developer Zone](https://hailo.ai/developer-zone/) (free)
 2. **Download** Hailo Dataflow Compiler SDK v3.33.0+
-3. **Extract** to `../hailo-compile/.venv_hailo_full/`
+3. **Extract** to `step4_hef_compilation/.venv_hailo_full/`
 
 ```bash
 # After downloading
-mkdir -p ../hailo-compile
-cd ../hailo-compile
+cd step4_hef_compilation
 tar -xzf hailo_dataflow_compiler_sdk_v3.33.0.tar.gz
-# Creates .venv_hailo_full/ directory
-cd ../MODEL-GEN
+# Creates .venv_hailo_full/ directory in step4_hef_compilation/
+cd ..
 ```
 
 **Verify installation**:
 ```bash
-ls ../hailo-compile/.venv_hailo_full/bin/activate
+ls step4_hef_compilation/.venv_hailo_full/bin/activate
 # Should exist
 ```
 

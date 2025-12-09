@@ -46,10 +46,10 @@ Required for INT8 quantization. Use 50-100 representative images from your train
 
 ```bash
 # Create calibration dataset from training images
-python3 prepare_calibration.py ../../datasets/yolo_dataset/
+python3 prepare_calibration.py ../datasets/yolo_dataset/
 
 # With custom number of samples
-python3 prepare_calibration.py ../../datasets/yolo_dataset/ --num-samples 100
+python3 prepare_calibration.py ../datasets/yolo_dataset/ --num-samples 100
 ```
 
 **Expected output:**
@@ -57,7 +57,7 @@ python3 prepare_calibration.py ../../datasets/yolo_dataset/ --num-samples 100
 ==============================================================
 Prepare Calibration Dataset for Hailo
 ==============================================================
-Source: ../../datasets/yolo_dataset/
+Source: ../datasets/yolo_dataset/
 Output: ./calibration_data
 Samples: 64
 Image size: 640x640
@@ -434,7 +434,7 @@ python3 export_onnx_with_nms.py <model.pt> --imgsz 640
 **Solution**: Recreate calibration data with `prepare_calibration.py` (ensures UINT8):
 ```bash
 rm -rf calibration_data/
-python3 prepare_calibration.py ../../datasets/yolo_dataset/
+python3 prepare_calibration.py ../datasets/yolo_dataset/
 python3 compile_to_hef.py ../step3_onnx_export/best_nms.onnx
 ```
 

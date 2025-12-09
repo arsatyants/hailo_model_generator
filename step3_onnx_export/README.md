@@ -21,9 +21,9 @@ Before starting this step, you must have:
    - Location: `../step2_training/runs/detect/<training_name>/weights/best.pt`
    - Typical size: 20-25 MB for YOLOv8s
 
-2. **Virtual Environment**: The `.venv` from project root with ultralytics installed
+2. **Virtual Environment**: The `.venv` from MODEL-GEN root with ultralytics installed
    ```bash
-   source ../../.venv/bin/activate
+   source ../.venv/bin/activate
    pip install ultralytics
    ```
 
@@ -33,7 +33,7 @@ Before starting this step, you must have:
 
 ```bash
 # Activate environment
-source ../../.venv/bin/activate
+source ../.venv/bin/activate
 
 # Export (basic)
 python3 export_onnx_with_nms.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt
@@ -198,7 +198,7 @@ step3_onnx_export/
 
 **Solution**:
 ```bash
-source ../../.venv/bin/activate
+source ../.venv/bin/activate
 pip install ultralytics
 ```
 

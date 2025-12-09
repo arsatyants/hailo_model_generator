@@ -25,8 +25,8 @@ python3 add_images_to_dataset.py
 - Skips images that already exist
 
 **Default paths:**
-- Source: `../../captured_images`
-- Target: `../../datasets/yolo_dataset`
+- Source: `../captured_images`
+- Target: `../datasets/yolo_dataset`
 
 **Custom paths:**
 ```bash

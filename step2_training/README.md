@@ -225,7 +225,7 @@ pip install ultralytics
 ### Issue: Training stops immediately
 **Solution:** Check data.yaml exists and paths are correct:
 ```bash
-cat ../../datasets/yolo_dataset/data.yaml
+cat ../datasets/yolo_dataset/data.yaml
 ```
 
 ---
