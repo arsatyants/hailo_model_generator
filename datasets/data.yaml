@@ -5,10 +5,10 @@
 # YOLOv8 will fail with relative paths like './train/images'
 
 # Path to training images (absolute path)
-train: ~/hailo_model_generator/datasets/train/images
+train: /home/arsatyants/hailo_model_generator/datasets/train/images
 
 # Path to validation images (absolute path)
-val: ~/hailo_model_generator/datasets/val/images
+val: /home/arsatyants/hailo_model_generator/datasets/val/images
 
 # Number of classes
 nc: 3

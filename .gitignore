@@ -24,6 +24,7 @@ step4_hef_compilation/*.hef
 models/*.hef
 
 # Training outputs
+runs/
 step2_training/runs/
 step2_training/weights/
 
@@ -60,3 +61,7 @@ Thumbs.db
 
 # Logs
 *.log
+yolo11n.pt
+yolov8s.pt
+datasets/train/labels.cache
+datasets/val/labels.cache

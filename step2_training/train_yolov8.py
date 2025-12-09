@@ -5,6 +5,7 @@ Supports both drone and IR-Drone classes
 """
 
 import argparse
+import os
 from pathlib import Path
 from ultralytics import YOLO
 
@@ -47,6 +48,11 @@ def train_yolov8(data_yaml, epochs=200, batch=32, imgsz=640, patience=15, name='
     print("   Training will stop early if no improvement after 15 epochs")
     print("   Press Ctrl+C to stop manually\n")
     
+    # Set project directory to keep training output in project root runs/ folder
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    project_dir = project_root / "runs" / "detect"
+    
     try:
         results = model.train(
             data=data_yaml,
@@ -55,6 +61,7 @@ def train_yolov8(data_yaml, epochs=200, batch=32, imgsz=640, patience=15, name='
             imgsz=imgsz,
             patience=patience,
             name=name,
+            project=str(project_dir),
             plots=True,  # Generate training plots
             save=True,   # Save checkpoints
             device=0,    # Use GPU if available, else CPU
@@ -63,18 +70,18 @@ def train_yolov8(data_yaml, epochs=200, batch=32, imgsz=640, patience=15, name='
         print("\n" + "="*60)
         print("✅ Training Complete!")
         print("="*60)
-        print(f"Best weights: runs/detect/{name}/weights/best.pt")
-        print(f"Last weights: runs/detect/{name}/weights/last.pt")
-        print(f"\nTraining plots saved to: runs/detect/{name}/")
+        print(f"Best weights: {project_dir}/{name}/weights/best.pt")
+        print(f"Last weights: {project_dir}/{name}/weights/last.pt")
+        print(f"\nTraining plots saved to: {project_dir}/{name}/")
         print("\n💡 Next step: Export to ONNX")
         print(f"   cd ../step3_onnx_export")
-        print(f"   python3 export_onnx_with_nms.py ../step2_training/runs/detect/{name}/weights/best.pt")
+        print(f"   python3 export_onnx_with_nms.py {project_dir}/{name}/weights/best.pt")
         
         return True
         
     except KeyboardInterrupt:
         print("\n\n⚠️  Training interrupted by user")
-        print(f"   Partial weights may be available in runs/detect/{name}/weights/")
+        print(f"   Partial weights may be available in {project_dir}/{name}/weights/")
         return False
     except Exception as e:
         print(f"\n❌ Training failed: {e}")
