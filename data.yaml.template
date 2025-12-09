@@ -1,0 +1,33 @@
+# YOLOv8 Dataset Configuration Template
+# Copy this file to your dataset directory and update paths
+
+# CRITICAL: Use absolute paths, not relative paths
+# YOLOv8 will fail with relative paths like './train/images'
+
+# Path to training images
+train: /absolute/path/to/your/dataset/train/images
+
+# Path to validation images
+val: /absolute/path/to/your/dataset/val/images
+
+# Number of classes
+nc: 2
+
+# Class names (must match label files)
+names:
+  0: drone
+  1: IR-Drone
+
+# Example for 4-class dataset:
+# nc: 4
+# names:
+#   0: AirPlane
+#   1: Drone
+#   2: Helicopter
+#   3: IR-Drone
+
+# Notes:
+# - Images should be in train/images/ and val/images/
+# - Labels should be in train/labels/ and val/labels/
+# - Label format: class x_center y_center width height (normalized 0-1)
+# - Empty label files are valid (negative samples with no objects)

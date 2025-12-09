@@ -1,0 +1,62 @@
+# MODEL-GEN .gitignore
+# Ignore generated files and large datasets
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Generated model files (keep template files, ignore actual models)
+step2_training/**/*.pt
+step2_training/**/*.pth
+step3_onnx_export/*.onnx
+step4_hef_compilation/*.hef
+models/*.hef
+
+# Training outputs
+step2_training/runs/
+step2_training/weights/
+
+# Calibration data
+step4_hef_compilation/calibration_data/
+step4_hef_compilation/*.hef
+step4_hef_compilation/_compile_temp.py
+
+# ONNX exports
+step3_onnx_export/*.onnx
+step3_onnx_export/*.onnx.json
+
+# Datasets (comment out if you want to commit small datasets)
+*.jpg
+*.jpeg
+*.png
+*.JPG
+*.JPEG
+*.PNG
+
+# Labels (comment out if you want to commit annotations)
+*.txt
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
