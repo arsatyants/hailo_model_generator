@@ -100,10 +100,9 @@ def prepare_calibration_images(source_dir, output_dir, num_samples=64, imgsz=640
             # Convert BGR to RGB (Hailo expects RGB)
             img_rgb = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
             
-            # Save as UINT8 [0-255] - NO normalization
-            output_path = output_dir / f"calib_{i:04d}.jpg"
-            img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)  # Convert back for cv2.imwrite
-            cv2.imwrite(str(output_path), img_bgr)
+            # Save as NPY file (UINT8 [0-255] - NO normalization)
+            output_path = output_dir / f"calib_{i:04d}.npy"
+            np.save(str(output_path), img_rgb)
             
             success_count += 1
             
@@ -116,13 +115,13 @@ def prepare_calibration_images(source_dir, output_dir, num_samples=64, imgsz=640
     
     print(f"\n✅ Prepared {success_count} calibration images")
     print(f"   Output directory: {output_dir}")
-    print(f"   Format: UINT8 RGB [0-255]")
+    print(f"   Format: NPY (UINT8 RGB [0-255])")
     print(f"   Size: {imgsz}x{imgsz}x3")
     
     # Verify output
-    sample_files = list(output_dir.glob('calib_*.jpg'))
+    sample_files = list(output_dir.glob('calib_*.npy'))
     if len(sample_files) > 0:
-        sample_img = cv2.imread(str(sample_files[0]))
+        sample_img = np.load(str(sample_files[0]))
         print(f"\n🔍 Verification:")
         print(f"   Sample image shape: {sample_img.shape}")
         print(f"   Data type: {sample_img.dtype}")

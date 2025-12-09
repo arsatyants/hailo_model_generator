@@ -2,17 +2,8 @@
 # This script configures optimization parameters for YOLOv8 compilation
 # Applied during ONNX → HEF conversion
 
-# Enable loose mode (suppress strict shape checking)
-# Required for YOLOv8 with NMS - warning is safe to ignore
-enable_loose_mode
-
 # Optimization level
 # 0 = Fastest compilation, good accuracy
 # 1 = Balanced
 # 2 = Best accuracy, slower compilation
-optimization_level(0)
-
-# Print summary
-print("Hailo optimization configuration applied:")
-print("  - enable_loose_mode: True")
-print("  - optimization_level: 0")
+model_optimization_config(optimization_level=0, batch_size=1)

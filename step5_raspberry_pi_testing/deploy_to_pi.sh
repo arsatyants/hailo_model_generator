@@ -15,6 +15,8 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo "=================================================================="
@@ -22,21 +24,43 @@ echo "Deploy and Test Hailo Model on Raspberry Pi 5"
 echo "=================================================================="
 echo ""
 
-# Check arguments
+# Interactive mode if no arguments provided
 if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <pi_ip> <pi_user>"
+    echo -e "${CYAN}Interactive Deployment Mode${NC}"
     echo ""
-    echo "Arguments:"
-    echo "  pi_ip       IP address of Raspberry Pi"
-    echo "  pi_user     Username on Raspberry Pi (usually 'pi')"
+    
+    # Prompt for IP address
+    echo -n "Enter Raspberry Pi IP address (e.g., 192.168.1.100): "
+    read PI_IP
+    
+    if [ -z "$PI_IP" ]; then
+        echo -e "${RED}❌ Error: IP address cannot be empty${NC}"
+        exit 1
+    fi
+    
+    # Prompt for username with default
+    echo -n "Enter username (default: pi): "
+    read PI_USER
+    PI_USER=${PI_USER:-pi}
+    
     echo ""
-    echo "Example:"
-    echo "  $0 192.168.3.205 pi"
-    exit 1
+    echo -e "${BLUE}Configuration:${NC}"
+    echo "  IP Address: $PI_IP"
+    echo "  Username:   $PI_USER"
+    echo ""
+    echo -n "Continue with deployment? (y/n): "
+    read CONFIRM
+    
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo "Deployment cancelled."
+        exit 0
+    fi
+    echo ""
+else
+    PI_IP="$1"
+    PI_USER="$2"
 fi
 
-PI_IP="$1"
-PI_USER="$2"
 PI_HOST="${PI_USER}@${PI_IP}"
 
 echo -e "${GREEN}Target: ${PI_HOST}${NC}"
@@ -137,27 +161,43 @@ echo "  Model:  ~/MODEL-GEN/models/${HEF_NAME}"
 echo "  Script: ~/MODEL-GEN/scripts/hailo_detect_live.py"
 echo "  Output: ~/MODEL-GEN/test_results/"
 echo ""
-echo "To run inference on Raspberry Pi:"
+echo -e "${CYAN}Quick Start - Test with Webcam via SSH:${NC}"
 echo ""
-echo "  1. SSH to Pi:"
-echo "     ssh ${PI_HOST}"
+echo "  1. SSH to Pi and run headless mode (recommended for SSH):"
+echo -e "     ${YELLOW}ssh ${PI_HOST}${NC}"
+echo -e "     ${YELLOW}cd ~/MODEL-GEN/scripts${NC}"
+echo -e "     ${YELLOW}python3 hailo_detect_live.py --model ../models/${HEF_NAME} --headless${NC}"
 echo ""
-echo "  2. Run detection with USB camera:"
-echo "     cd ~/MODEL-GEN/scripts"
+echo -e "${BLUE}Other Options:${NC}"
+echo ""
+echo "  2. With USB webcam (interactive, requires X11 forwarding):"
 echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME}"
 echo ""
-echo "  3. Run with Raspberry Pi Camera:"
-echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME} --picamera"
+echo "  3. With Raspberry Pi Camera Module:"
+echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME} --picamera --headless"
 echo ""
-echo "  4. Headless mode (save frames only, no display):"
-echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME} --headless"
+echo "  4. Adjust detection thresholds:"
+echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME} --headless --conf 0.35 --iou 0.5"
 echo ""
-echo "  5. Adjust detection thresholds:"
-echo "     python3 hailo_detect_live.py --model ../models/${HEF_NAME} --conf 0.35 --iou 0.5"
+echo -e "${CYAN}Controls during inference:${NC}"
+echo "  Ctrl+C     - Stop and show statistics"
+echo "  's' key    - Save current frame (if display enabled)"
+echo "  'r' key    - Toggle recording mode"
+echo "  'q' key    - Quit"
 echo ""
-echo "Controls during inference:"
-echo "  'q' - Quit"
-echo "  's' - Save current frame"
-echo "  'r' - Toggle recording mode (auto-save all detections)"
+echo -e "${GREEN}Headless mode benefits:${NC}"
+echo "  • Works perfectly over SSH (no display needed)"
+echo "  • Auto-saves detection frames to ~/MODEL-GEN/test_results/"
+echo "  • Shows FPS and detection stats in terminal"
+echo "  • Uses /dev/video0 webcam automatically"
 echo ""
 echo "=================================================================="
+echo ""
+echo -n "Would you like to SSH to Pi now? (y/n): "
+read SSH_NOW
+
+if [[ "$SSH_NOW" =~ ^[Yy]$ ]]; then
+    echo ""
+    echo -e "${CYAN}Connecting to ${PI_HOST}...${NC}"
+    ssh -t "${PI_HOST}" "cd ~/MODEL-GEN/scripts && bash -l"
+fi

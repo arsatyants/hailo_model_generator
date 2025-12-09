@@ -64,17 +64,19 @@ def prepare_calibration_data(calib_dir, num_samples=64):
         print("   └── ...")
         return None
     
-    # Find image files
-    image_files = []
-    for ext in ['*.jpg', '*.jpeg', '*.png']:
-        image_files.extend(calib_dir.glob(ext))
+    # Find calibration files (NPY or image files)
+    calib_files = list(calib_dir.glob('*.npy'))
+    if not calib_files:
+        # Fall back to image files
+        for ext in ['*.jpg', '*.jpeg', '*.png']:
+            calib_files.extend(calib_dir.glob(ext))
     
-    if len(image_files) < num_samples:
-        print(f"⚠️  Warning: Found only {len(image_files)} images, need {num_samples}")
-        print(f"   Using {len(image_files)} images for calibration")
-        num_samples = len(image_files)
+    if len(calib_files) < num_samples:
+        print(f"⚠️  Warning: Found only {len(calib_files)} calibration files, need {num_samples}")
+        print(f"   Using {len(calib_files)} files for calibration")
+        num_samples = len(calib_files)
     
-    print(f"📊 Calibration dataset: {num_samples} images from {calib_dir}")
+    print(f"📊 Calibration dataset: {num_samples} files from {calib_dir}")
     
     return calib_dir
 
@@ -104,13 +106,14 @@ def compile_onnx_to_hef(onnx_path, output_name, calib_dir, hailo_venv):
     
     compile_code = f'''
 import sys
+from pathlib import Path
 from hailo_sdk_client import ClientRunner
 
-# Paths
-onnx_path = r"{onnx_path}"
-calib_dir = r"{calib_dir}"
-output_hef = r"{output_hef}"
-optimization_script = r"{optimization_script}"
+# Paths (all as Path objects to avoid AttributeError)
+onnx_path = Path(r"{onnx_path}")
+calib_dir = Path(r"{calib_dir}")
+output_hef = Path(r"{output_hef}")
+optimization_script = Path(r"{optimization_script}")
 
 print("="*60)
 print("Hailo Dataflow Compiler")
@@ -126,27 +129,31 @@ try:
     
     # Step 1: Parse ONNX
     print("\\n[1/4] Parsing ONNX model...")
+    # Use Conv output nodes recommended by Hailo SDK for HailoRT post-processing
+    end_nodes = ['/model.22/cv2.0/cv2.0.2/Conv', '/model.22/cv3.0/cv3.0.2/Conv', \\
+                 '/model.22/cv2.1/cv2.1.2/Conv', '/model.22/cv3.1/cv3.1.2/Conv', \\
+                 '/model.22/cv2.2/cv2.2.2/Conv', '/model.22/cv3.2/cv3.2.2/Conv']
     hn = runner.translate_onnx_model(
-        onnx_path,
+        str(onnx_path),
         'yolov8',
         start_node_names=['images'],
-        end_node_names=['output0'],
+        end_node_names=end_nodes,
         net_input_shapes={{'images': [1, 3, 640, 640]}}
     )
     print("   ✅ ONNX parsed")
     
     # Step 2: Optimize
     print("\\n[2/4] Optimizing model...")
-    if optimization_script.exists():
-        runner.load_model_script(str(optimization_script))
-        print(f"   ✅ Applied optimization script: {{optimization_script}}")
-    else:
-        print("   ⚠️  No optimization script found, using defaults")
+    # Skip optimization script for now - use SDK defaults
+    print("   ✅ Using SDK default optimization settings")
     
     # Step 3: Quantize (calibration)
     print("\\n[3/4] Quantizing model (calibration)...")
-    print(f"   Using {len(list(Path(calib_dir).glob('*.jpg')))} calibration images")
-    runner.optimize(calib_dataset=calib_dir)
+    calib_files = list(calib_dir.glob('*.npy'))
+    if not calib_files:
+        calib_files = list(calib_dir.glob('*.jpg'))
+    print(f"   Using {{len(calib_files)}} calibration files")
+    runner.optimize(str(calib_dir))
     print("   ✅ Quantization complete")
     
     # Step 4: Compile to HEF
@@ -192,7 +199,8 @@ except Exception as e:
     )
     
     # Cleanup temp script
-    compile_script.unlink()
+    if compile_script.exists():
+        compile_script.unlink()
     
     if result.returncode != 0:
         print("\n❌ Compilation failed")

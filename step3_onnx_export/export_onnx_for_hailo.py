@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Export YOLOv8 PyTorch model to ONNX format WITH NMS
-Critical: nms=True ensures embedded NMS for Hailo compatibility
+Export YOLOv8 PyTorch model to ONNX format for Hailo compilation
+
+CRITICAL: For Hailo-8, we export WITHOUT NMS (nms=False)
+NMS will be handled in post-processing on Raspberry Pi
 """
 
 import argparse
@@ -9,9 +11,9 @@ from pathlib import Path
 from ultralytics import YOLO
 import re
 
-def export_onnx_with_nms(pt_path, output_dir=None, imgsz=640):
+def export_onnx_for_hailo(pt_path, output_dir=None, imgsz=640):
     """
-    Export PyTorch model to ONNX with embedded NMS
+    Export PyTorch model to ONNX WITHOUT NMS for Hailo compilation
     
     Args:
         pt_path: Path to .pt model file
@@ -28,21 +30,21 @@ def export_onnx_with_nms(pt_path, output_dir=None, imgsz=640):
         return None
     
     print("="*60)
-    print("Export YOLOv8 to ONNX with NMS")
+    print("Export YOLOv8 to ONNX for Hailo")
     print("="*60)
     print(f"Model: {pt_path}")
     print(f"Image size: {imgsz}")
-    print("NMS: ENABLED (critical for Hailo)")
+    print("NMS: DISABLED (post-processing on Pi)")
     print("="*60)
     
     # Load model
     print("\n📦 Loading model...")
     model = YOLO(str(pt_path))
     
-    # Export with NMS enabled
+    # Export WITHOUT NMS for Hailo
     print("\n🚀 Exporting to ONNX...")
     print("   Settings:")
-    print("   - nms=True (embeds NMS in graph)")
+    print("   - nms=False (NMS in post-processing)")
     print("   - opset=11 (Hailo compatible)")
     print("   - simplify=True (graph optimization)")
     print()
@@ -51,7 +53,7 @@ def export_onnx_with_nms(pt_path, output_dir=None, imgsz=640):
         result = model.export(
             format='onnx',
             imgsz=imgsz,
-            nms=True,        # CRITICAL: Embed NMS in ONNX
+            nms=False,       # CRITICAL: No NMS for Hailo
             opset=11,        # Hailo requires opset 11
             simplify=True    # Simplify graph
         )
@@ -77,7 +79,7 @@ def export_onnx_with_nms(pt_path, output_dir=None, imgsz=640):
         if output_dir:
             output_dir = Path(output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
-            final_path = output_dir / f"{pt_path.stem}_nms.onnx"
+            final_path = output_dir / f"{pt_path.stem}_hailo.onnx"
             import shutil
             shutil.copy2(onnx_path, final_path)
             onnx_path = final_path
@@ -89,11 +91,12 @@ def export_onnx_with_nms(pt_path, output_dir=None, imgsz=640):
         print(f"Size: {onnx_path.stat().st_size / 1024 / 1024:.1f} MB")
         print()
         print("📊 Expected output format:")
-        print("   Shape: (1, 300, 6)")
-        print("   Format: [batch, detections, (x1, y1, x2, y2, conf, class)]")
+        print("   Shape: (1, 84, 8400) for YOLOv8")
+        print("   Format: Raw predictions [x, y, w, h, class_scores...]")
         print()
-        print("💡 Next step: Verify export")
-        print(f"   python3 verify_onnx_export.py {onnx_path}")
+        print("💡 Next step: Compile to HEF")
+        print(f"   cd ../step4_hef_compilation")
+        print(f"   python3 compile_to_hef.py {onnx_path}")
         
         return onnx_path
         
@@ -147,7 +150,7 @@ def find_latest_model(runs_dir=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Export YOLOv8 to ONNX with NMS')
+    parser = argparse.ArgumentParser(description='Export YOLOv8 to ONNX for Hailo compilation')
     parser.add_argument(
         'model',
         nargs='?',
@@ -183,7 +186,7 @@ def main():
             return 1
     
     # Export
-    onnx_path = export_onnx_with_nms(
+    onnx_path = export_onnx_for_hailo(
         pt_path=model_path,
         output_dir=args.output_dir,
         imgsz=args.imgsz

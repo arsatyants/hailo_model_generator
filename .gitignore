@@ -65,3 +65,4 @@ yolo11n.pt
 yolov8s.pt
 datasets/train/labels.cache
 datasets/val/labels.cache
+step4_hef_compilation/.venv_hailo_full
