@@ -46,10 +46,10 @@ Required for INT8 quantization. Use 50-100 representative images from your train
 
 ```bash
 # Create calibration dataset from training images
-python3 prepare_calibration.py ../../lesson_18/drone_dataset/yolo_dataset/
+python3 prepare_calibration.py ../../datasets/yolo_dataset/
 
 # With custom number of samples
-python3 prepare_calibration.py ../../lesson_18/drone_dataset/yolo_dataset/ --num-samples 100
+python3 prepare_calibration.py ../../datasets/yolo_dataset/ --num-samples 100
 ```
 
 **Expected output:**
@@ -57,7 +57,7 @@ python3 prepare_calibration.py ../../lesson_18/drone_dataset/yolo_dataset/ --num
 ==============================================================
 Prepare Calibration Dataset for Hailo
 ==============================================================
-Source: ../../lesson_18/drone_dataset/yolo_dataset/
+Source: ../../datasets/yolo_dataset/
 Output: ./calibration_data
 Samples: 64
 Image size: 640x640
@@ -402,8 +402,8 @@ See `working_hailo_detector.py` in project root for complete example.
 
 **Solution**: Install Hailo Dataflow Compiler SDK:
 1. Download from [Hailo Developer Zone](https://hailo.ai/developer-zone/)
-2. Extract to `../../hailo-compile/.venv_hailo_full/`
-3. Verify: `ls ../../hailo-compile/.venv_hailo_full/bin/activate`
+2. Extract to `.venv_hailo_full/` (within step4_hef_compilation/)
+3. Verify: `ls .venv_hailo_full/bin/activate`
 
 ### Compilation fails: "No module named 'hailo_sdk_client'"
 
@@ -411,7 +411,7 @@ See `working_hailo_detector.py` in project root for complete example.
 
 **Solution**: Reinstall SDK or check Python path:
 ```bash
-source ../../hailo-compile/.venv_hailo_full/bin/activate
+source .venv_hailo_full/bin/activate
 python3 -c "import hailo_sdk_client; print('OK')"
 ```
 
@@ -434,7 +434,7 @@ python3 export_onnx_with_nms.py <model.pt> --imgsz 640
 **Solution**: Recreate calibration data with `prepare_calibration.py` (ensures UINT8):
 ```bash
 rm -rf calibration_data/
-python3 prepare_calibration.py ../../lesson_18/drone_dataset/yolo_dataset/
+python3 prepare_calibration.py ../../datasets/yolo_dataset/
 python3 compile_to_hef.py ../step3_onnx_export/best_nms.onnx
 ```
 

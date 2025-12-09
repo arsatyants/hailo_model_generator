@@ -25,8 +25,8 @@ python3 add_images_to_dataset.py
 - Skips images that already exist
 
 **Default paths:**
-- Source: `../../hailo-compile/captured_images`
-- Target: `../../lesson_18/drone_dataset/yolo_dataset`
+- Source: `../../captured_images`
+- Target: `../../datasets/yolo_dataset`
 
 **Custom paths:**
 ```bash
@@ -116,7 +116,7 @@ Total bounding boxes: 98
 After completing these steps, your dataset should look like:
 
 ```
-lesson_18/drone_dataset/yolo_dataset/
+MODEL-GEN/datasets/yolo_dataset/
 ├── images/
 │   ├── capture_001.jpg
 │   ├── capture_002.jpg
@@ -136,8 +136,8 @@ If `data.yaml` doesn't exist, create it:
 
 ```yaml
 # Absolute paths required
-train: /absolute/path/to/lesson_18/drone_dataset/yolo_dataset/images
-val: /absolute/path/to/lesson_18/drone_dataset/yolo_dataset/images
+train: /absolute/path/to/MODEL-GEN/datasets/yolo_dataset/images
+val: /absolute/path/to/MODEL-GEN/datasets/yolo_dataset/images
 
 # Number of classes
 nc: 2
