@@ -85,8 +85,8 @@ def main():
     parser = argparse.ArgumentParser(description='Train YOLOv8 for drone detection')
     parser.add_argument(
         '--data',
-        default='../datasets/yolo_dataset/data.yaml',
-        help='Path to data.yaml (default: ../datasets/yolo_dataset/data.yaml)'
+        default='../datasets/data.yaml',
+        help='Path to data.yaml (default: ../datasets/data.yaml)'
     )
     parser.add_argument(
         '--epochs',

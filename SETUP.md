@@ -142,7 +142,7 @@ source .venv/bin/activate
 
 **Example**:
 ```bash
-./run_pipeline.sh ../lesson_18/drone_dataset/yolo_dataset drone_detector
+./run_pipeline.sh datasets drone_detector
 ```
 
 This will:

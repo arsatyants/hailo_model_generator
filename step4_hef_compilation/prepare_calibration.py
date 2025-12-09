@@ -141,10 +141,10 @@ def main():
         epilog='''
 Examples:
   # From training dataset
-  python3 prepare_calibration.py ../datasets/yolo_dataset/
+  python3 prepare_calibration.py ../datasets/
 
   # Custom number of samples
-  python3 prepare_calibration.py ../datasets/yolo_dataset/ --num-samples 100
+  python3 prepare_calibration.py ../datasets/ --num-samples 100
 
   # Custom output directory
   python3 prepare_calibration.py /path/to/images/ --output ./my_calib_data/

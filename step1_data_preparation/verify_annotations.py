@@ -147,8 +147,8 @@ def main():
     parser = argparse.ArgumentParser(description='Verify YOLO dataset annotations')
     parser.add_argument(
         '--dataset-dir',
-        default='../datasets/yolo_dataset',
-        help='YOLO dataset directory (default: ../datasets/yolo_dataset)'
+        default='../datasets',
+        help='YOLO dataset directory (default: ../datasets)'
     )
     
     args = parser.parse_args()

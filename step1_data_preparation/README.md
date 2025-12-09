@@ -26,7 +26,7 @@ python3 add_images_to_dataset.py
 
 **Default paths:**
 - Source: `../captured_images`
-- Target: `../datasets/yolo_dataset`
+- Target: `../datasets`
 
 **Custom paths:**
 ```bash
@@ -116,7 +116,7 @@ Total bounding boxes: 98
 After completing these steps, your dataset should look like:
 
 ```
-MODEL-GEN/datasets/yolo_dataset/
+MODEL-GEN/datasets/
 ├── images/
 │   ├── capture_001.jpg
 │   ├── capture_002.jpg
@@ -136,8 +136,8 @@ If `data.yaml` doesn't exist, create it:
 
 ```yaml
 # Absolute paths required
-train: /absolute/path/to/MODEL-GEN/datasets/yolo_dataset/images
-val: /absolute/path/to/MODEL-GEN/datasets/yolo_dataset/images
+train: /absolute/path/to/MODEL-GEN/datasets/train/images
+val: /absolute/path/to/MODEL-GEN/datasets/val/images
 
 # Number of classes
 nc: 2
