@@ -8,19 +8,49 @@ Train YOLOv8 model on annotated drone dataset.
 - Ultralytics: `pip install ultralytics`
 - PyTorch (installed automatically with ultralytics)
 - CUDA (optional, for GPU acceleration - highly recommended)
+- **Dataset split into train/val sets** (see below)
+
+## Before Training: Split Dataset
+
+If you haven't already split your dataset into train/val sets, run:
+
+```bash
+cd ../step1_data_preparation
+python3 split_train_val.py --dataset-dir ../datasets --val-ratio 0.15
+```
+
+**What it does:**
+- Randomly moves 15% of images from train/ to val/ directory
+- Maintains corresponding label files
+- Uses seed=42 for reproducibility
+
+**Expected output:**
+```
+Split Train/Validation Dataset
+Total images: 61
+Split: 52 train, 9 validation
+✅ Split complete!
+   Train: 52 images
+   Validation: 9 images
+```
+
+**Note:** Only run this once! Running again will re-shuffle your dataset.
+
+---
 
 ## Quick Start
 
 ```bash
 # Train with default settings (200 epochs, batch=32)
-python3 train_yolov8.py
+python3 train_yolov8.py ../datasets/data.yaml
 ```
 
 This will:
 1. Load YOLOv8s pretrained weights
-2. Train on your annotated dataset
-3. Save best model to `runs/detect/train_drone_ir/weights/best.pt`
-4. Generate training plots and metrics
+2. Train on your annotated dataset (train/ directory)
+3. Validate on validation set (val/ directory)
+4. Save best model to `runs/detect/train_drone_ir/weights/best.pt`
+5. Generate training plots and metrics
 
 ---
 
