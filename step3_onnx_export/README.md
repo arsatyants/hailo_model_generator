@@ -1,17 +1,25 @@
-# STEP 3: Export ONNX with NMS
 
-Export your trained YOLOv8 PyTorch model (`.pt`) to ONNX format with embedded Non-Maximum Suppression (NMS).
+# STEP 3: ONNX Export for Hailo (with or without NMS)
 
-## Critical Settings
+Export your trained YOLOv8 PyTorch model (`.pt`) to ONNX format for Hailo-8 compilation. **You can now export ONNX with or without embedded Non-Maximum Suppression (NMS)** for maximum flexibility.
 
-**The most important parameter for Hailo deployment is `nms=True`**. This enables post-processing inside the ONNX model, producing a clean output format that Hailo can properly compile.
 
-### What NMS Does
+## NMS Options: Flexible Export
 
-- **Without NMS** (`nms=False`): Output is raw YOLO format `(1, 6, 8400)` - 8400 anchor predictions
-- **With NMS** (`nms=True`): Output is post-processed format `(1, 300, 6)` - up to 300 filtered detections
+You can export ONNX **with or without NMS embedded**:
 
-The second format is what we need for Hailo HEF compilation.
+- **WITHOUT NMS (recommended for Hailo-8):**
+   - `nms=False` (default)
+   - Model outputs raw predictions `(1, 6, 8400)`
+   - **Python NMS is performed in the inference script on the Pi**
+   - Maximum flexibility, always compiles for Hailo-8
+
+- **WITH NMS (optional/legacy):**
+   - Use `--nms` flag
+   - Model outputs final detections `(1, 300, 6)` (NMS embedded in ONNX)
+   - No Python NMS needed on Pi
+   - Less flexible, may not be supported for all YOLOv8 models
+
 
 ## Input Requirements
 
@@ -20,50 +28,38 @@ Before starting this step, you must have:
 1. **Trained Model**: `best.pt` file from STEP 2
    - Location: `../step2_training/runs/detect/<training_name>/weights/best.pt`
    - Typical size: 20-25 MB for YOLOv8s
-
 2. **Virtual Environment**: The `.venv` from MODEL-GEN root with ultralytics installed
    ```bash
    source ../.venv/bin/activate
    pip install ultralytics
    ```
 
+
 ## Quick Start
 
-### 1. Export to ONNX
+### 1. Export to ONNX (with or without NMS)
 
 ```bash
 # Activate environment
 source ../.venv/bin/activate
 
-# Export (basic)
-python3 export_onnx_with_nms.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt
+# Export ONNX WITHOUT NMS (recommended)
+python3 export_onnx_for_hailo.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt
+
+# Export ONNX WITH NMS embedded
+python3 export_onnx_for_hailo.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt --nms
 
 # Export (with custom output name)
-python3 export_onnx_with_nms.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt \
-    --output drone_detector_nms.onnx
+python3 export_onnx_for_hailo.py ../step2_training/runs/detect/train_drone_ir/weights/best.pt --nms --output drone_detector_nms.onnx
 ```
 
-**Expected output:**
-```
-Exporting PyTorch model to ONNX with NMS...
-Model: ../step2_training/runs/detect/train_drone_ir/weights/best.pt
-Output: best_nms.onnx
-ONNX export settings:
-   format=onnx
-   nms=True (CRITICAL)
-   opset=11
-   simplify=True
-   imgsz=640
-Starting export...
-✅ Export successful!
-Output file: best_nms.onnx (43.2 MB)
-```
 
-**File size check**: ONNX with NMS is ~2x larger than PT file (40-50 MB vs 20-25 MB) because it includes the NMS operations.
+**File size check**: ONNX with NMS is ~2x larger than PT file (40-50 MB vs 20-25 MB) because it includes the NMS operations. ONNX without NMS is smaller and outputs raw predictions.
+
 
 ### 2. Verify Export Quality
 
-**Critical test**: Run inference on a pure black image. A correct export should produce **0 detections** (no false positives).
+**Critical test:** Run inference on a pure black image. A correct export (with NMS) should produce **0 detections** (no false positives).
 
 ```bash
 python3 verify_onnx_export.py best_nms.onnx
@@ -71,46 +67,21 @@ python3 verify_onnx_export.py best_nms.onnx
 
 **Expected output (PASS):**
 ```
-==============================================================
-Verify ONNX Export - Black Image Test
-==============================================================
-Model: best_nms.onnx
-Size: 43.2 MB
-==============================================================
-
-📦 Loading ONNX model...
-   Input name: images
-   Input shape: [1, 3, 640, 640]
-   Outputs: 1
-      [0] output0: [1, 300, 6]
-
-🖤 Creating pure black test image (640x640)...
-🔍 Running inference on black image...
-
-📊 Results:
-   Output shape: (1, 300, 6)
-   Detections found: 0
-
-==============================================================
+Output shape: (1, 300, 6)
+Detections found: 0
 ✅ VERIFICATION PASSED
-==============================================================
-   ONNX model correctly produces 0 detections on black image
-   Export with nms=True is working correctly
-
-💡 Next step: Compile to HEF
-   cd ../step4_hef_compilation
-   ./compile_to_hef.sh /absolute/path/to/best_nms.onnx
 ```
+
 
 **If verification fails (detections found on black image):**
 ```
 ❌ VERIFICATION FAILED
-   Found 4 false positive(s) on black image
+   Found false positives on black image
    This indicates the ONNX export is incorrect
 
 🔧 Solution:
-   Re-export with nms=True:
-   python3 export_onnx_with_nms.py <model.pt>
+   Re-export with correct NMS setting:
+   python3 export_onnx_for_hailo.py <model.pt> --nms
 ```
 
 ## Output Format Details
@@ -122,34 +93,36 @@ Size: 43.2 MB
 - **Range**: `[0.0, 1.0]` (normalized)
 - **Color**: RGB order
 
+
 ### ONNX Output (with NMS)
 - **Format**: `(batch, max_detections, 6)`
 - **Shape**: `(1, 300, 6)`
 - **Type**: `float32`
 - **Channels**:
-  - `[0]`: x1 (left)
-  - `[1]`: y1 (top)
-  - `[2]`: x2 (right)
-  - `[3]`: y2 (bottom)
-  - `[4]`: confidence (0-1)
-  - `[5]`: class_id (integer)
+   - `[0]`: x1 (left)
+   - `[1]`: y1 (top)
+   - `[2]`: x2 (right)
+   - `[3]`: y2 (bottom)
+   - `[4]`: confidence (0-1)
+   - `[5]`: class_id (integer)
 
 **Coordinates**: Absolute pixel values (0-640 range for 640x640 image)
 
-### ONNX Output (without NMS - broken)
+### ONNX Output (without NMS)
 - **Format**: `(batch, channels, anchors)`
 - **Shape**: `(1, 6, 8400)`
-- **Problem**: Hailo cannot properly compile this format
+- **Note**: Hailo can now compile this format, but you **must use Python NMS in the inference script** on the Pi.
 
 ## Export Parameters Explained
 
 ### Required Settings
 
-#### `nms=True` (CRITICAL)
+
+#### `nms` (configurable)
 - **Purpose**: Embed Non-Maximum Suppression in ONNX graph
 - **Effect**: Converts raw YOLO output to post-processed detections
-- **Why**: Hailo compilation works correctly with this format
-- **Default**: `False` (must explicitly set to `True`)
+- **Why**: Hailo compilation works with both, but Python NMS is recommended for flexibility
+- **Default**: `False` (must explicitly set to `True` for embedded NMS)
 
 #### `opset=11`
 - **Purpose**: ONNX operator set version
@@ -188,7 +161,8 @@ step3_onnx_export/
 └── best_nms.onnx.json         # (optional) metadata file
 ```
 
-**Keep the ONNX file** - you'll need it for STEP 4 (HEF compilation).
+
+**Keep the ONNX file** - you'll need it for STEP 4 (HEF compilation). Name it clearly to indicate if NMS is embedded or not.
 
 ## Troubleshooting
 
@@ -230,12 +204,8 @@ pip install onnxruntime
 
 **Problem**: Model exported without NMS or with incorrect settings
 
-**Root Cause**: Output shape is `(1, 6, 8400)` instead of `(1, 300, 6)`
 
-**Solution**: Re-export with correct parameters:
-```bash
-python3 export_onnx_with_nms.py <model.pt>
-```
+**Root Cause**: Output shape is `(1, 6, 8400)` (no NMS) or `(1, 300, 6)` (with NMS). If you want embedded NMS, re-export with `--nms`.
 
 Verify the export script has:
 ```python
@@ -270,13 +240,10 @@ rm best_nms.onnx
 python3 export_onnx_with_nms.py <model.pt>
 ```
 
+
 Verify output shape with:
 ```bash
-python3 -c "
-import onnxruntime as ort
-sess = ort.InferenceSession('best_nms.onnx')
-print('Output shape:', sess.get_outputs()[0].shape)
-"
+python3 -c "import onnxruntime as ort; sess = ort.InferenceSession('best_nms.onnx'); print('Output shape:', sess.get_outputs()[0].shape)"
 ```
 
 ## Performance Expectations
@@ -299,6 +266,7 @@ print('Output shape:', sess.get_outputs()[0].shape)
 - **Black image test**: <1 second
 - **ONNX Runtime**: Uses CPU inference
 - **Memory**: ~500 MB for YOLOv8s
+
 
 ## Next Steps
 
@@ -377,15 +345,25 @@ print(f"Inputs: {[inp.name for inp in model.graph.input]}")
 print(f"Outputs: {[out.name for out in model.graph.output]}")
 ```
 
+
 ## Summary Checklist
 
 - [ ] Virtual environment activated (`.venv`)
 - [ ] `ultralytics` package installed
 - [ ] `onnxruntime` package installed (for verification)
 - [ ] Trained `.pt` model available from STEP 2
-- [ ] Export script run with `nms=True`
-- [ ] ONNX file size ~2x larger than PT file
-- [ ] Verification test passed (0 detections on black image)
+- [ ] Export script run with correct NMS setting (default: no NMS, or use `--nms`)
+- [ ] ONNX file size matches expectations (with NMS: ~2x PT file, without NMS: ~same as PT file)
+- [ ] Verification test passed (0 detections on black image for NMS models)
 - [ ] ONNX file path copied for STEP 4
 
 **Ready for STEP 4**: When verification passes, you can compile to HEF format for Hailo-8 deployment.
+
+---
+
+## Inference and Python NMS
+
+- If you export **without NMS** (`nms=False`), the inference script (`hailo_detect_live.py`) will automatically apply Python NMS to the raw model outputs on the Pi.
+- If you export **with NMS** (`--nms`), the inference script will detect this and **skip Python NMS**, using the model's output directly.
+
+See project Copilot instructions for more details and best practices.

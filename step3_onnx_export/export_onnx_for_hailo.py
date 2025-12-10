@@ -11,7 +11,7 @@ from pathlib import Path
 from ultralytics import YOLO
 import re
 
-def export_onnx_for_hailo(pt_path, output_dir=None, imgsz=640):
+def export_onnx_for_hailo(pt_path, output_dir=None, imgsz=640, nms=False):
     """
     Export PyTorch model to ONNX WITHOUT NMS for Hailo compilation
     
@@ -34,26 +34,27 @@ def export_onnx_for_hailo(pt_path, output_dir=None, imgsz=640):
     print("="*60)
     print(f"Model: {pt_path}")
     print(f"Image size: {imgsz}")
-    print("NMS: DISABLED (post-processing on Pi)")
+    if nms:
+        print("NMS: ENABLED (embedded in ONNX, no Python NMS needed)")
+    else:
+        print("NMS: DISABLED (post-processing on Pi)")
     print("="*60)
     
     # Load model
     print("\n📦 Loading model...")
     model = YOLO(str(pt_path))
     
-    # Export WITHOUT NMS for Hailo
     print("\n🚀 Exporting to ONNX...")
     print("   Settings:")
-    print("   - nms=False (NMS in post-processing)")
+    print(f"   - nms={nms} ({'embedded in ONNX' if nms else 'NMS in post-processing'})")
     print("   - opset=11 (Hailo compatible)")
     print("   - simplify=True (graph optimization)")
     print()
-    
     try:
         result = model.export(
             format='onnx',
             imgsz=imgsz,
-            nms=False,       # CRITICAL: No NMS for Hailo
+            nms=nms,         # User-controlled
             opset=11,        # Hailo requires opset 11
             simplify=True    # Simplify graph
         )
@@ -171,8 +172,14 @@ def main():
         help='Custom runs directory to search (default: ../runs/detect)'
     )
     
+    parser.add_argument(
+        '--nms',
+        action='store_true',
+        help='Export ONNX with NMS embedded (default: False, disables NMS for Hailo best practice)'
+    )
+
     args = parser.parse_args()
-    
+
     # Auto-find latest model if not provided
     model_path = args.model
     if not model_path:
@@ -184,14 +191,15 @@ def main():
             print("❌ Error: No trained model found")
             print("   Please provide model path explicitly or train a model first")
             return 1
-    
+
     # Export
     onnx_path = export_onnx_for_hailo(
         pt_path=model_path,
         output_dir=args.output_dir,
-        imgsz=args.imgsz
+        imgsz=args.imgsz,
+        nms=args.nms
     )
-    
+
     return 0 if onnx_path else 1
 
 

@@ -124,6 +124,20 @@ else
     exit 1
 fi
 echo ""
+    
+
+# Copy NMS postprocess script
+scp "$(dirname \"hailo_detect_live.py\")/nms_postprocess.py" "${PI_HOST}:~/MODEL-GEN/scripts/"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ NMS postprocess script copied${NC}"
+else
+    echo -e "${RED}❌ Failed to copy NMS postprocess script${NC}"
+    exit 1
+fi
+
+# Automated NMS post-processing (if raw_output.npy exists)
+echo "🔎 Checking for raw_output.npy on Pi..."
+ssh "${PI_HOST}" "if [ -f '~/MODEL-GEN/test_results/raw_output.npy' ]; then echo '⚡ Running NMS post-processing...'; python3 ~/MODEL-GEN/scripts/nms_postprocess.py --input ~/MODEL-GEN/test_results/raw_output.npy --output ~/MODEL-GEN/test_results/detections; else echo 'No raw_output.npy found, skipping NMS.'; fi"
 
 # Copy requirements
 echo "📄 Copying requirements.txt..."
