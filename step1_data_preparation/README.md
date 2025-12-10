@@ -143,7 +143,7 @@ val: /absolute/path/to/MODEL-GEN/datasets/val/images
 nc: 2
 
 # Class names (index matches class_id in labels)
-names: ['drone', 'IR-Drone']
+names: ['DL-Drone', 'IR-Drone']
 ```
 
 **Important:** Use absolute paths, not relative paths!
@@ -159,7 +159,7 @@ names: ['drone', 'IR-Drone']
 4. **Negative samples**: Empty label files are valid (no objects in image)
 
 ### Class Selection
-- **Class 0 (drone)**: Regular RGB visible drones
+- **Class 0 (DL-Drone)**: Regular RGB visible drones
 - **Class 1 (IR-Drone)**: Thermal/infrared visible drones
 
 ### Hard Negatives
