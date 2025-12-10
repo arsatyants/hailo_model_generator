@@ -12,7 +12,7 @@ Prepare captured images and create YOLO format annotations for training.
 
 ### 1. Add Captured Images to Dataset
 
-Copy images from `hailo-compile/captured_images/` to the dataset:
+Copy images from `../captured_images/` to the dataset:
 
 ```bash
 python3 add_images_to_dataset.py
@@ -48,7 +48,7 @@ python3 annotate_drones.py
 **Controls:**
 - **Mouse**: Click and drag to draw bounding box
 - **Number keys (0-1)**: Select class before drawing
-  - `0` = drone (regular)
+  - `0` = DL-Drone (regular)
   - `1` = IR-Drone (infrared)
 - **ENTER**: Save current annotation and move to next image
 - **SPACE**: Skip image (useful for negative samples)
