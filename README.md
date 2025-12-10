@@ -4,7 +4,7 @@ Complete workflow for preparing, training, and compiling YOLOv8 models for Hailo
 
 ## Overview
 
-This pipeline converts drone detection images into production-ready `.hef` files for Raspberry Pi 5 with Hailo-8.
+This pipeline converts detection images into production-ready `.hef` files for Raspberry Pi 5 with Hailo-8.
 
 **Input:** Raw captured images from camera  
 **Output:** Optimized `.hef` model file for Hailo-8 inference
