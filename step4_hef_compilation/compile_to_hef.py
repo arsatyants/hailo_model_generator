@@ -98,7 +98,10 @@ def compile_onnx_to_hef(onnx_path, output_name, calib_dir, hailo_venv):
         Path to generated HEF file, or None on error
     """
     onnx_path = Path(onnx_path).resolve()
-    output_hef = Path(f"{output_name}.hef").resolve()
+    # Save HEF to models directory
+    models_dir = Path(__file__).parent.parent / 'models'
+    models_dir.mkdir(parents=True, exist_ok=True)
+    output_hef = (models_dir / f"{output_name}.hef").resolve()
     optimization_script = Path(__file__).parent / 'hailo_optimization.mscript'
     
     # Create Python script for Hailo SDK

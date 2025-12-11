@@ -67,10 +67,10 @@ echo -e "${GREEN}Target: ${PI_HOST}${NC}"
 echo ""
 
 # Find HEF file
-HEF_FILE=$(find ../step4_hef_compilation -name "*.hef" -type f | head -n 1)
+HEF_FILE=$(find ../models -name "*.hef" -type f | head -n 1)
 
 if [ -z "$HEF_FILE" ]; then
-    echo -e "${RED}❌ Error: No HEF file found in step4_hef_compilation/${NC}"
+    echo -e "${RED}❌ Error: No HEF file found in models/${NC}"
     echo ""
     echo "Please compile your model first:"
     echo "  cd ../step4_hef_compilation"
