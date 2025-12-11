@@ -8,7 +8,7 @@ NMS will be handled in post-processing on Raspberry Pi
 
 import argparse
 from pathlib import Path
-from ultralytics import YOLO
+from ultralytics import YOLO  # type: ignore
 import re
 
 def export_onnx_for_hailo(pt_path, output_dir=None, imgsz=640, nms=False):

@@ -7,7 +7,7 @@ Supports both drone and IR-Drone classes
 import argparse
 import os
 from pathlib import Path
-from ultralytics import YOLO
+from ultralytics import YOLO  # type: ignore
 
 def train_yolov8(data_yaml, epochs=200, batch=32, imgsz=640, patience=15, name='train_drone_ir'):
     """

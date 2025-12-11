@@ -127,7 +127,7 @@ class DroneAnnotator:
             self.start_point = (x, y)
         
         elif event == cv2.EVENT_MOUSEMOVE:
-            if self.drawing:
+            if self.drawing and self.start_point is not None:
                 self.temp_image = self.current_image.copy()
                 color = self.class_colors[self.current_class % len(self.class_colors)]
                 cv2.rectangle(self.temp_image, self.start_point, (x, y), color, 2)
@@ -138,7 +138,7 @@ class DroneAnnotator:
                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         
         elif event == cv2.EVENT_LBUTTONUP:
-            if self.drawing:
+            if self.drawing and self.start_point is not None:
                 self.drawing = False
                 self.current_bbox = (self.start_point[0], self.start_point[1], x, y)
     
