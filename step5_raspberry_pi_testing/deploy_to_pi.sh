@@ -39,9 +39,9 @@ if [ "$#" -lt 2 ]; then
     fi
     
     # Prompt for username with default
-    echo -n "Enter username (default: pi): "
+    echo -n "Enter username (default: admin): "
     read PI_USER
-    PI_USER=${PI_USER:-pi}
+    PI_USER=${PI_USER:-admin}
     
     echo ""
     echo -e "${BLUE}Configuration:${NC}"
