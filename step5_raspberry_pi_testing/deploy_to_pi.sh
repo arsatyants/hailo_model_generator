@@ -43,6 +43,11 @@ if [ "$#" -lt 2 ]; then
     read PI_USER
     PI_USER=${PI_USER:-admin}
     
+    # Prompt for password
+    echo -n "Enter password for ${PI_USER}@${PI_IP}: "
+    read -s PI_PASSWORD
+    echo ""
+    
     echo ""
     echo -e "${BLUE}Configuration:${NC}"
     echo "  IP Address: $PI_IP"
@@ -62,6 +67,12 @@ else
 fi
 
 PI_HOST="${PI_USER}@${PI_IP}"
+
+# Check if sshpass is installed
+if ! command -v sshpass &> /dev/null; then
+    echo -e "${YELLOW}⚠️  Installing sshpass for password handling...${NC}"
+    sudo apt-get update -qq && sudo apt-get install -y sshpass -qq
+fi
 
 echo -e "${GREEN}Target: ${PI_HOST}${NC}"
 echo ""
@@ -84,7 +95,7 @@ echo ""
 
 # Test SSH connection
 echo "🔌 Testing connection to Raspberry Pi..."
-if ! ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no "${PI_HOST}" "echo 'SSH OK'" > /dev/null 2>&1; then
+if ! sshpass -p "${PI_PASSWORD}" ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no "${PI_HOST}" "echo 'SSH OK'" > /dev/null 2>&1; then
     echo -e "${RED}❌ Error: Cannot connect to ${PI_HOST}${NC}"
     echo ""
     echo "Troubleshooting:"
@@ -99,13 +110,13 @@ echo ""
 
 # Create directories on Pi
 echo "📁 Creating directories on Pi..."
-ssh "${PI_HOST}" "mkdir -p ~/MODEL-GEN/models ~/MODEL-GEN/test_results ~/MODEL-GEN/scripts"
+sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "mkdir -p ~/MODEL-GEN/models ~/MODEL-GEN/test_results ~/MODEL-GEN/scripts"
 echo -e "${GREEN}✅ Directories created${NC}"
 echo ""
 
 # Copy HEF file
 echo "📦 Copying HEF model to Pi..."
-scp "$HEF_FILE" "${PI_HOST}:~/MODEL-GEN/models/"
+sshpass -p "${PI_PASSWORD}" scp "$HEF_FILE" "${PI_HOST}:~/MODEL-GEN/models/"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ HEF file copied${NC}"
 else
@@ -116,7 +127,7 @@ echo ""
 
 # Copy inference script
 echo "📄 Copying inference script to Pi..."
-scp hailo_detect_live.py "${PI_HOST}:~/MODEL-GEN/scripts/"
+sshpass -p "${PI_PASSWORD}" scp hailo_detect_live.py "${PI_HOST}:~/MODEL-GEN/scripts/"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Script copied${NC}"
 else
@@ -127,7 +138,7 @@ echo ""
     
 
 # Copy NMS postprocess script
-scp "$(dirname \"hailo_detect_live.py\")/nms_postprocess.py" "${PI_HOST}:~/MODEL-GEN/scripts/"
+sshpass -p "${PI_PASSWORD}" scp "$(dirname "hailo_detect_live.py")/nms_postprocess.py" "${PI_HOST}:~/MODEL-GEN/scripts/"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ NMS postprocess script copied${NC}"
 else
@@ -137,33 +148,33 @@ fi
 
 # Automated NMS post-processing (if raw_output.npy exists)
 echo "🔎 Checking for raw_output.npy on Pi..."
-ssh "${PI_HOST}" "if [ -f '~/MODEL-GEN/test_results/raw_output.npy' ]; then echo '⚡ Running NMS post-processing...'; python3 ~/MODEL-GEN/scripts/nms_postprocess.py --input ~/MODEL-GEN/test_results/raw_output.npy --output ~/MODEL-GEN/test_results/detections; else echo 'No raw_output.npy found, skipping NMS.'; fi"
+sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "if [ -f '~/MODEL-GEN/test_results/raw_output.npy' ]; then echo '⚡ Running NMS post-processing...'; python3 ~/MODEL-GEN/scripts/nms_postprocess.py --input ~/MODEL-GEN/test_results/raw_output.npy --output ~/MODEL-GEN/test_results/detections; else echo 'No raw_output.npy found, skipping NMS.'; fi"
 
 # Copy requirements
 echo "📄 Copying requirements.txt..."
-scp requirements.txt "${PI_HOST}:~/MODEL-GEN/scripts/"
+sshpass -p "${PI_PASSWORD}" scp requirements.txt "${PI_HOST}:~/MODEL-GEN/scripts/"
 echo ""
 
 # Check Hailo installation on Pi
 echo "🔍 Checking Hailo installation on Pi..."
-HAILO_CHECK=$(ssh "${PI_HOST}" "python3 -c 'import hailo_platform; print(\"OK\")' 2>/dev/null || echo 'FAIL'")
+HAILO_CHECK=$(sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "python3 -c 'import hailo_platform; print(\"OK\")' 2>/dev/null || echo 'FAIL'")
 
 if [ "$HAILO_CHECK" = "OK" ]; then
     echo -e "${GREEN}✅ HailoRT is installed${NC}"
 else
     echo -e "${YELLOW}⚠️  HailoRT not found, installing...${NC}"
-    ssh "${PI_HOST}" "sudo apt update && sudo apt install -y python3-hailort"
+    sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "sudo apt update && sudo apt install -y python3-hailort"
 fi
 echo ""
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies on Pi..."
-ssh "${PI_HOST}" "cd ~/MODEL-GEN/scripts && pip3 install -r requirements.txt --break-system-packages" 2>/dev/null || \
-ssh "${PI_HOST}" "cd ~/MODEL-GEN/scripts && pip3 install opencv-python numpy --break-system-packages"
+sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "cd ~/MODEL-GEN/scripts && pip3 install -r requirements.txt --break-system-packages" 2>/dev/null || \
+sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "cd ~/MODEL-GEN/scripts && pip3 install opencv-python numpy --break-system-packages"
 echo ""
 
 # Make script executable
-ssh "${PI_HOST}" "chmod +x ~/MODEL-GEN/scripts/hailo_detect_live.py"
+sshpass -p "${PI_PASSWORD}" ssh "${PI_HOST}" "chmod +x ~/MODEL-GEN/scripts/hailo_detect_live.py"
 
 # Print usage instructions
 echo "=================================================================="
@@ -207,11 +218,14 @@ echo "  • Uses /dev/video0 webcam automatically"
 echo ""
 echo "=================================================================="
 echo ""
-echo -n "Would you like to SSH to Pi now? (y/n): "
-read SSH_NOW
+echo -e "${GREEN}✅ Deployment complete!${NC}"
+echo ""
+echo "To connect to Pi and run inference:"
+echo -e "  ${YELLOW}ssh ${PI_HOST}${NC}"
+echo -e "  ${YELLOW}cd ~/MODEL-GEN/scripts${NC}"
+echo -e "  ${YELLOW}python3 hailo_detect_live.py --model ../models/drone_detector.hef --headless${NC}"
+echo ""
 
-if [[ "$SSH_NOW" =~ ^[Yy]$ ]]; then
-    echo ""
-    echo -e "${CYAN}Connecting to ${PI_HOST}...${NC}"
-    ssh -t "${PI_HOST}" "cd ~/MODEL-GEN/scripts && bash -l"
-fi
+exit 0
+
+exit 0
