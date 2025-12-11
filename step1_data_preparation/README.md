@@ -12,7 +12,7 @@ Prepare captured images and create YOLO format annotations for training.
 
 ### 1. Add Captured Images to Dataset
 
-Copy images from `hailo-compile/captured_images/` to the dataset:
+Copy images from `../captured_images/` to the dataset:
 
 ```bash
 python3 add_images_to_dataset.py
@@ -48,7 +48,7 @@ python3 annotate_drones.py
 **Controls:**
 - **Mouse**: Click and drag to draw bounding box
 - **Number keys (0-1)**: Select class before drawing
-  - `0` = drone (regular)
+  - `0` = DL-Drone (regular)
   - `1` = IR-Drone (infrared)
 - **ENTER**: Save current annotation and move to next image
 - **SPACE**: Skip image (useful for negative samples)
@@ -143,7 +143,7 @@ val: /absolute/path/to/MODEL-GEN/datasets/val/images
 nc: 2
 
 # Class names (index matches class_id in labels)
-names: ['drone', 'IR-Drone']
+names: ['DL-Drone', 'IR-Drone']
 ```
 
 **Important:** Use absolute paths, not relative paths!
@@ -159,7 +159,7 @@ names: ['drone', 'IR-Drone']
 4. **Negative samples**: Empty label files are valid (no objects in image)
 
 ### Class Selection
-- **Class 0 (drone)**: Regular RGB visible drones
+- **Class 0 (DL-Drone)**: Regular RGB visible drones
 - **Class 1 (IR-Drone)**: Thermal/infrared visible drones
 
 ### Hard Negatives
