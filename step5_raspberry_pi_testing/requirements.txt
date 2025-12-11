@@ -1,0 +1,12 @@
+# STEP 5: Raspberry Pi Testing Requirements
+# For running Hailo-8 inference on Raspberry Pi 5
+
+# HailoRT is installed via apt on Raspberry Pi:
+# sudo apt install python3-hailort
+
+# Python packages (pip installable):
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Optional: Raspberry Pi Camera support
+# picamera2  # Pre-installed on Raspberry Pi OS

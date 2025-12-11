@@ -1,0 +1,16 @@
+# STEP 4: HEF Compilation Requirements
+# These are installed via Hailo SDK, not pip
+
+# Required: Hailo Dataflow Compiler SDK
+# Download from: https://hailo.ai/developer-zone/software-downloads/
+# Instalation guide: https://hailo.ai/developer-zone/documentation/dataflow-compiler-v3-33-0/?sp_referrer=install/install.html
+
+# Install to: .venv_hailo_full/ (in this directory)
+
+# Python packages (from Hailo SDK):
+# - hailo_sdk_client
+# - hailo_model_optimization
+
+# Additional requirements (pip installable):
+opencv-python>=4.8.0
+numpy>=1.24.0

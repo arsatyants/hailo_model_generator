@@ -1,0 +1,6 @@
+# STEP 2: Training Requirements
+# For YOLOv8 model training
+
+ultralytics>=8.0.0
+torch>=2.0.0
+torchvision>=0.15.0

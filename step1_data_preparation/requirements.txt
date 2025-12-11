@@ -1,0 +1,5 @@
+# STEP 1: Data Preparation Requirements
+# For annotation tools and dataset management
+
+opencv-python>=4.8.0
+numpy>=1.24.0

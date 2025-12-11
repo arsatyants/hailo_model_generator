@@ -1,0 +1,7 @@
+# STEP 3: ONNX Export Requirements
+# For exporting PyTorch models to ONNX format
+
+ultralytics>=8.0.0
+onnx>=1.14.0
+onnxruntime>=1.15.0
+onnx-simplifier>=0.4.0
